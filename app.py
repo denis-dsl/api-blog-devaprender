@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # Configurações inicias
 app.config['SECRET_KEY'] = 'segredo2030'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres.ixmdvajbzeggegklhpeq:bLudHuyoYZPEr83K@aws-0-us-west-1.pooler.supabase.com:5432/postgres'
 
 db = SQLAlchemy(app)
 db: SQLAlchemy
@@ -40,7 +40,9 @@ def token_obrigatorio(f):
             token = request.headers['x-acess-token']
         # Se não houver um token, retornar a requesição, solicitando um token
         if not token:
-            return jsonify({'mensagem': 'Token de autenticação precisa ser incluído nessa requisição!'})
+            return jsonify({
+                'mensagem':
+                'Token de autenticação precisa serincluído nessa requisição!'})
         try:
             dados = jwt.decode(token, app.config['SECRET_KEY'])
             autor_atual = Autor.query.filter_by(
@@ -201,17 +203,22 @@ def excluir_autor(autor_atual, id_autor):
 def login():
     dados_autenticacao = request.authorization
 
-    if not dados_autenticacao or not dados_autenticacao.username or not dados_autenticacao.password:
-        return make_response('Login inválido', 401, {'WWW-Authenticate': 'Basic realm="Login obrigatório!"'})
+    if not dados_autenticacao or not dados_autenticacao.username or not (dados_autenticacao.password):
+        return make_response('Login inválido', 401,
+                             {'WWW-Authenticate':
+                              'Basic realm="Login obrigatório!"'})
 
     user = Autor.query.filter_by(nome=dados_autenticacao.username).first()
     if user.senha == dados_autenticacao.password:
-        token = jwt.encode({'id_autor': user.id_autor, 'exp': datetime.datetime.utcnow(
-        ) + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+        token = jwt.encode(
+            {'id_autor': user.id_autor, 'exp': datetime.datetime.utcnow() +
+             datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
 
         return jsonify({'token': token.decode('UTF-8')})
 
-    return make_response('Login inválido', 401, {'WWW-Authenticate': 'Basic realm="Login obrigatório!"'})
+    return make_response('Login inválido', 401,
+                         {'WWW-Authenticate':
+                          'Basic realm="Login obrigatório!"'})
 
 
 if __name__ == '__main__':

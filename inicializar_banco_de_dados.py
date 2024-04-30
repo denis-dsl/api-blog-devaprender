@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 def inicializar():
-
     app = Flask(__name__)
     # Configurações inicias
     app.config['SECRET_KEY'] = 'segredo2030'
@@ -27,12 +26,13 @@ def inicializar():
         admin = db.Column(db.Boolean)
         postagens = db.relationship('Postagem')
 
-    db.drop_all()
-    db.create_all()
-    autor = Autor(nome='Jhonatan', email='jhonatan@hotmail.com',
-                  senha='senha123', admin=True)
-    db.session.add(autor)
-    db.session.commit()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        autor = Autor(nome='Jhonatan', email='jhonatan@hotmail.com',
+                      senha='senha123', admin=True)
+        db.session.add(autor)
+        db.session.commit()
 
 
 if __name__ == '__main__':
